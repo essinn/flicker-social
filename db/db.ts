@@ -30,19 +30,32 @@ export const db = new sqlite3.Database("db/db.sqlite", (err: Error) => {
     }
   });
 
-  db.run(
-    `CREATE TABLE IF NOT EXISTS posts (
-        postId INTEGER PRIMARY KEY AUTOINCREMENT,
-        userId INTEGER FOREIGN KEY,
-        imageUrl TEXT, 
-        caption TEXT,
-        createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+  db.run("DROP TABLE IF EXISTS posts", (err: Error) => {
+    if (err) {
+      console.error("Error dropping posts table:", err);
+    } else {
+      console.log("Posts table dropped successfully.");
+
+      // Now recreate the table with the correct schema
+      db.run(
+        `CREATE TABLE IF NOT EXISTS posts (
+          postId INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId INTEGER,
+          imageUrl TEXT, 
+          caption TEXT,
+          createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
         )`,
-    (err: Error) => {
-      if (err) console.log("Posts table already created");
-      console.log("Posts table created");
+        (err: Error) => {
+          if (err) {
+            console.error("Error creating posts table:", err);
+          } else {
+            console.log("Posts table created successfully.");
+          }
+        }
+      );
     }
-  );
+  });
 
   db.run(
     `CREATE TABLE IF NOT EXISTS comments (
