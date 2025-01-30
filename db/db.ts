@@ -4,22 +4,31 @@ export const db = new sqlite3.Database("db/db.sqlite", (err: Error) => {
   if (err) console.error(err.message);
   console.log("Connected to the SQLite database.");
 
-  db.run(
-    `CREATE TABLE IF NOT EXISTS users (
-        userId INTEGER PRIMARY KEY AUTOINCREMENT,
-        username VARCHAR(50) UNIQUE,
-        bio TEXT
-        email TEXT UNIQUE,
-        password TEXT,
-        salt TEXT,
-        sessionToken TEXT,
-        createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+  db.run("DROP TABLE IF EXISTS users", (err: Error) => {
+    if (err) {
+      console.error("Error dropping users table:", err);
+    } else {
+      console.log("Users table dropped successfully.");
+
+      // Now recreate the table with the correct schema
+      db.run(
+        `CREATE TABLE IF NOT EXISTS users (
+            userId INTEGER PRIMARY KEY AUTOINCREMENT,
+            username VARCHAR(50) UNIQUE,
+            bio TEXT,
+            email TEXT UNIQUE,
+            password TEXT,
+            salt TEXT,
+            sessionToken TEXT,
+            createdAt TEXT DEFAULT CURRENT_TIMESTAMP
         )`,
-    (err: Error) => {
-      if (err) console.log("Users table already created");
-      console.log("Users table created");
+        (err: Error) => {
+          if (err) console.error("Error creating users table:", err);
+          else console.log("Users table created successfully.");
+        }
+      );
     }
-  );
+  });
 
   db.run(
     `CREATE TABLE IF NOT EXISTS posts (
